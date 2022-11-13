@@ -138,22 +138,13 @@ void Initialize(void)
   Motor_Setup();
   Init_Encoder();
   Interrupt_Setting();
-  
-  crash_pid_param1.kP=2;
-  crash_pid_param1.kI=0.002;
-  //crash_pid_param1.kD=0.15;
-  //crash_pid_param2.kP=10;
-  //crash_pid_param2.kI=1;
-  //crash_pid_param2.kD=10;
+  PIDGain_Input();
   
   pwm1=0;
   pwm2=0;
 
   Wheel_round = 2*PI*Wheel_radius;
   Robot_round = 2*PI*Robot_radius;
-
-  switch_direction = true;
-  Theta_Distance_Flag = 0;
 
   ROS_INFO("PWM_range %d", PWM_range);
   ROS_INFO("PWM_frequency %d", PWM_frequency);
@@ -164,6 +155,8 @@ void Initialize(void)
 
   printf("\033[2J");  
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////
 
 void Motor_Controller(int motor_num, bool direction, int pwm)
 {
@@ -205,175 +198,8 @@ void Motor_Controller(int motor_num, bool direction, int pwm)
    }
   }
 }
-void Accel_Controller(int motor_num, bool direction, int desired_pwm)
-{
-  bool local_current_direction;
-  int local_PWM;
-  int local_current_PWM;
 
-  if(motor_num == 1)
-  {
-    local_current_direction = current_Direction1;
-    local_current_PWM = current_PWM1;
-  }
-  else if(motor_num == 2)
-  {
-    local_current_direction = current_Direction2;
-    local_current_PWM = current_PWM2;
-  }
-
-  if(direction == local_current_direction)
-  {
-    if(desired_pwm > local_current_PWM)
-    {
-      local_PWM = local_current_PWM + acceleration;
-      Motor_Controller(motor_num, direction, local_PWM);
-    }
-    else if(desired_pwm < local_current_PWM)
-    {
-      local_PWM = local_current_PWM - acceleration;
-      Motor_Controller(motor_num, direction, local_PWM);
-    }
-    else
-    {
-      local_PWM = local_current_PWM;
-      Motor_Controller(motor_num, direction, local_PWM);
-    }
-  }
-  else
-  {
-	  if(desired_pwm >= 0)
-	  {
-      local_PWM = local_current_PWM - acceleration;
-      if(local_PWM <= 0)
-      {
-        local_PWM = 0;
-        Motor_Controller(motor_num, direction, local_PWM);
-      }
-      else Motor_Controller(motor_num, local_current_direction, local_PWM);
-	  }
-    else
-    {
-      local_PWM = local_current_PWM;
-      Motor_Controller(motor_num, direction, local_PWM);
-    }
-  }
-}
-
-void Switch_Turn_Example(int PWM1, int PWM2)
-{
-  int local_PWM1 = Limit_Function(PWM1);
-  int local_PWM2 = Limit_Function(PWM2);
-  if(switch_direction == true)
-  {
-    Motor_Controller(1, switch_direction, local_PWM1);
-    Motor_Controller(2, switch_direction, local_PWM2);
-    switch_direction = false;
-    ROS_INFO("true");
-  }
-  else
-  {
-    Motor_Controller(1, switch_direction, local_PWM1);
-    Motor_Controller(2, switch_direction, local_PWM2);
-    switch_direction = true;
-    ROS_INFO("false");
-  }
-}
-void Theta_Turn(double Theta, int PWM)
-{
-  double local_encoder;
-  int local_PWM = Limit_Function(PWM);
-  if(Theta_Distance_Flag == 1)
-  {
-      Init_Encoder();
-      Theta_Distance_Flag = 2;
-  }
-  Motor1_Encoder_Sum();
-  Motor2_Encoder_Sum();
-  if(Theta > 0)
-  {
-    local_encoder = (Encoder_resolution*4/360)*(Robot_round/Wheel_round)*Theta;
-    Motor_Controller(1, false, local_PWM);
-    Motor_Controller(2, false, local_PWM);
-    //Accel_Controller(1, false, local_PWM);
-    //Accel_Controller(2, false, local_PWM);
-  }
-  else
-  {
-    local_encoder = -(Encoder_resolution*4/360)*(Robot_round/Wheel_round)*Theta;
-    Motor_Controller(1, true, local_PWM);
-    Motor_Controller(2, true, local_PWM);
-    //Accel_Controller(1, true, local_PWM);
-    //Accel_Controller(2, true, local_PWM);
-  }
-
-  if(EncoderCounter1 > local_encoder)
-  {
-    Init_Encoder();
-    Motor_Controller(1, true, 0);
-    Motor_Controller(2, true, 0);
-    Theta_Distance_Flag = 3;
-  }
-}
-void Distance_Go(double Distance, int PWM)
-{
-  double local_encoder = (Encoder_resolution*4*Distance)/Wheel_round;
-  int local_PWM = Limit_Function(PWM);
-  bool Direction = true;
-  if(Distance < 0)
-  {
-    Direction = false;
-    local_encoder = -local_encoder;
-  }
-  if(Theta_Distance_Flag == 3)
-  {
-      Init_Encoder();
-      Theta_Distance_Flag = 4;
-  }
-  Motor1_Encoder_Sum();
-  Motor2_Encoder_Sum();
-  if(EncoderCounter1 < local_encoder)
-  {
-    if(Direction==true)
-    {
-      Motor_Controller(1, false, local_PWM);
-      Motor_Controller(2, true, local_PWM);
-      //Accel_Controller(1, false, local_PWM);
-      //Accel_Controller(2, true, local_PWM);
-    }
-    else
-    {
-      Motor_Controller(1, true, local_PWM);
-      Motor_Controller(2, false, local_PWM);
-      //Accel_Controller(1, true, local_PWM);
-      //Accel_Controller(2, false, local_PWM);
-    }
-  }
-  else
-  {
-    Init_Encoder();
-    Motor_Controller(1, true, 0);
-    Motor_Controller(2, true, 0);
-    //Accel_Controller(1, true, 0);
-    //Accel_Controller(2, true, 0);
-    Theta_Distance_Flag = 0;
-  }
-}
-void Theta_Distance(double Theta, int Turn_PWM, double Distance, int Go_PWM)
-{
-  if(Theta_Distance_Flag == 0)
-  {
-    Theta_Distance_Flag = 1;
-  }
-  else if(Theta_Distance_Flag == 1 || Theta_Distance_Flag == 2)
-  {
-    Theta_Turn(Theta, Turn_PWM);
-  }
-  else if(Theta_Distance_Flag == 3 || Theta_Distance_Flag == 4)
-  {
-    Distance_Go(Distance, Go_PWM);
-  }
-}
+////////////////////////////////////////////////////////////////////////////////////////////
 
 int Limit_Function(int pwm)
 {
@@ -409,22 +235,92 @@ void Motor_View()
 	printf("RPM1 : %10.0f    ||  RPM2 : %10.0f\n", RPM_Value1, RPM_Value2);
 	printf("PWM1 : %10.0d    ||  PWM2 : %10.0d\n", current_PWM1, current_PWM2);
 	printf("DIR1 :%10.0d     ||  DIR2 :%10.0d\n", current_Direction1, current_Direction2);
-	printf("Acc  :%10.0d\n", acceleration);
+	printf("kP_1 :%f     ||  kP_2 :%f\n", crash_pid_param1.kP, crash_pid_param2.kP);
+	printf("kI_1 :%f     ||  kI_2 :%f\n", crash_pid_param1.kI, crash_pid_param2.kI);
+	printf("kD_1 :%f     ||  kD_2 :%f\n", crash_pid_param1.kD, crash_pid_param2.kD);
+	printf("Error_1 :%f     ||  Error_2 :%f\n", crash_pid1.error, crash_pid2.error);
 	printf("\n");
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void Motor_robot_vel(){  //robot motor control by robot velocity(linear x, linear y, angular z)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-double PidContoller(double goal, double curr, double dt, pid *pid_data, pid_param *pid_paramdata, int error_rat)
+void PIDGain_Input(void)
+{
+  int i = 0;
+  std::size_t found;
+  std::ifstream inFile;
+  inFile.open("/home/ubuntu/catkin_ws/src/crashlab_main/crashlab_motor/crashlab_motor_control/pid_gain.txt");
+  for(std::string line; std::getline(inFile,line);)
+  {
+      found=line.find("=");
+
+      switch(i)
+      {
+      case 0: crash_pid_param1.kP = atof(line.substr(found+2).c_str()); break;
+      case 1: crash_pid_param1.kI = atof(line.substr(found+2).c_str()); break;
+      case 2: crash_pid_param1.kD = atof(line.substr(found+2).c_str()); break;
+      case 3: crash_pid_param2.kP = atof(line.substr(found+2).c_str()); break;
+      case 4: crash_pid_param2.kI = atof(line.substr(found+2).c_str()); break;
+      case 5: crash_pid_param2.kD = atof(line.substr(found+2).c_str()); break;
+      case 6: crash_pid1.error_ratio = atof(line.substr(found+2).c_str()); break;
+      case 7: crash_pid2.error_ratio = atof(line.substr(found+2).c_str()); break;
+          //case :  = atof(line.substr(found+2).c_str()); break;
+      }
+      i +=1;
+  }
+  inFile.close();
+}
+
+//--------------------------------------------------------------------------------------
+double PidContoller(double goal, double curr, double cycle, pid *pid_data, pid_param *pid_paramdata)
 {
   // ROS_INFO(" goal : %f, curr: %f, dt: %f", goal,curr,dt);
   // double error = goal - curr;
   // ROS_INFO(" error : %f", error);
+  double dt = 1/cycle;
+  double error_rat = pid_data -> error_ratio;
   pid_data -> error = goal - curr;
+  
+  if (fabs(pid_data -> error) < error_rat)
+    pid_data -> error = 0;
+
+  pid_data->p_out = pid_paramdata->kP * pid_data -> error;
+  double p_data = pid_data->p_out ;
+
+  pid_data->integrator += (pid_data -> error * pid_paramdata->kI) * dt;
+  double i_data = pid_data->integrator;
+  i_data = constrain(i_data, -pid_paramdata->Imax, pid_paramdata->Imax);
+
+  double filter = 15.9155e-3; // Set to  "1 / ( 2 * PI * f_cut )";
+  // Examples for _filter:
+  // f_cut = 10 Hz -> _filter = 15.9155e-3
+  // f_cut = 15 Hz -> _filter = 10.6103e-3
+  // f_cut = 20 Hz -> _filter =  7.9577e-3
+  // f_cut = 25 Hz -> _filter =  6.3662e-3
+  // f_cut = 30 Hz -> _filter =  5.3052e-3
+
+  //pid_data->derivative = (goal - pid_data->last_input) / dt;
+  //pid_data->derivative = pid_data->lastderivative + (dt / (filter + dt)) * (pid_data->derivative - pid_data->lastderivative);
+  //pid_data->last_input = goal;
+  //pid_data->lastderivative = pid_data->derivative;
+  pid_data -> derivative = pid_paramdata->kD * (pid_data -> error - pid_data -> lasterror)/dt;
+  double d_data = pid_data->derivative;
+  //d_data = constrain(d_data, -pid_paramdata->Dmax, pid_paramdata->Dmax);
+
+  double output = p_data + i_data + d_data;
+  pid_data->output = output;
+  
+  pid_data -> lasterror = pid_data -> error;
+
+  return pid_data->output;
+}
+//----------------------------------------------------------------------------------
+double simplePID(double goal, double curr, double cycle, pid *pid_data, pid_param *pid_paramdata)
+{
+  double dt = 1/cycle;
+  double error_rat = pid_data -> error_ratio;
+  pid_data -> error = goal - curr;
+  
   if (fabs(pid_data -> error) < error_rat)
     pid_data -> error = 0;
 
@@ -461,28 +357,66 @@ double PidContoller(double goal, double curr, double dt, pid *pid_data, pid_para
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Motor_robot_vel(double rpm1, double rpm2){  //robot motor control by robot velocity(linear x, linear y, angular z)
+void Motor_Control_RPM(double rpm1, double rpm2){  //robot motor control by robot velocity(linear x, linear y, angular z)
 
-  pwm1 = PidContoller(rpm1, RPM_Value1, 0.1, &crash_pid1, &crash_pid_param1, 1);
-  //pwm2 = PidContoller(rpm2, RPM_Value2, 0.1, &crash_pid2, &crash_pid_param2, 1);
+  pwm1 = PidContoller(rpm1, RPM_Value1, Control_cycle, &crash_pid1, &crash_pid_param1);
+  //pwm2 = PidContoller(rpm2, RPM_Value2, Control_cycle, &crash_pid2, &crash_pid_param2);
   Motor_Controller(1, true, pwm1);
   //Motor_Controller(2, true, 80+pwm2);
   //Motor_Controller(1, true, 83);
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void GetVelCallback(const geometry_msgs::Twist& msg){
+  vel_msgs.linear.x = msg.linear.x;
+  vel_msgs.angular.z = msg.angular.z;
+}
+
+void Motor_robot_vel(double linear_x, double angular_z){  //robot motor control by robot velocity(linear x, linear y, angular z)
+//Wheel_radius : 바퀴 반지름(cm)
+//rpm: 분장 회전수
+//linear_x, angular_z : 속도(m/s)
+//PI : 원주율
+//rpm * (2 * pi * r) : 속도(cm/m)
+//(rpm/60) * (2 * pi* (r/100)) : 속도(m/s)
+  double rpm_1 = 60 * (linear_x - angular_z*2*Robot_radius) / (2 * PI * Wheel_radius / 100);
+  double rpm_2 = 60 * (linear_x + angular_z*2*Robot_radius) / (2 * PI * Wheel_radius / 100);
+  
+  if(rpm_1 >= 0){
+    pwm1 = PidContoller(rpm_1, RPM_Value1, Control_cycle, &crash_pid1, &crash_pid_param1);
+    Motor_Controller(1, true, pwm1);
+  }
+  else{
+    pwm1 = PidContoller(-rpm_1, RPM_Value1, Control_cycle, &crash_pid1, &crash_pid_param1);
+    Motor_Controller(1, false, pwm1);
+  }
+  
+  if(rpm_2 >= 0){
+    pwm2 = PidContoller(rpm_2, RPM_Value2, Control_cycle, &crash_pid2, &crash_pid_param2);
+    Motor_Controller(2, false, pwm2);
+  }
+  else{
+    pwm2 = PidContoller(-rpm_2, RPM_Value2, Control_cycle, &crash_pid2, &crash_pid_param2);
+    Motor_Controller(2, true, pwm2);
+  }
+  
+}
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char** argv)
 {
-  ROS_INFO("ASDF");
   ros::init(argc, argv, "motor_control_node");
   ros::NodeHandle nh;
   Initialize();
   ros::Rate loop_rate(Control_cycle);
   
+  sub_cmd_vel = nh.subscribe("crashlab/cmd_vel", 10, GetVelCallback);
+  
   while(ros::ok())
   {
-    Motor_robot_vel(80, 80);
+    Motor_Control_RPM(80, 80);
     Motor_View();
     //Motor_Controller(1, true, 83);
     ros::spinOnce();

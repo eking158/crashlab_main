@@ -57,42 +57,15 @@ void Init_Encoder(void);
 ////////////////////////////////////////////////////////////////////////////////////////////////////////// 
 void Initialize(void);
 
-//Motor_Controller
-void Motor_Controller(int motor_num, bool direction, int pwm);
-void Accel_Controller(int motor_num, bool direction, int desired_pwm);
-
-//Example
-bool switch_direction;
-int Theta_Distance_Flag;
-void Switch_Turn_Example(int PWM1, int PWM2);
-void Theta_Turn(double Theta, int PWM);
-void Distance_Go(double Distance, int PWM);
-void Theta_Distance(double Theta, int Turn_PWM, double Distance, int Go_PWM);
-
 //Utiliy
-int Limit_Function(int pwm);
 double RPM_Value1;
 double RPM_Value2;
 void RPM_Calculator();
-void Motor_View();
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////
-int desire_rpm1;
-int desire_rpm2;
-
-double cur_rpm1;
-double cur_rpm2;
-///////////////////////////////////////////////////////////////////////////////////////////////
 
 ros::Publisher pub_rpm;
-ros::Subscriber sub_pwm;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-
-crashlab_motor_msgs::control_motor pwm_msgs;
 crashlab_motor_msgs::control_motor rpm_msgs;
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void GetPWMCallback(const crashlab_motor_msgs::control_motor& msg);
-void Motor_robot_vel(double rpm1, double rpm2);
 #endif // MOTOR_NODE_H

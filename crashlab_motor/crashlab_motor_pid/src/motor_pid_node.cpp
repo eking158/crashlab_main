@@ -36,6 +36,8 @@ void Text_Input(void)
   inFile.close();
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////
+
 int Motor_Setup(void)
 {
   pinum=pigpio_start(NULL, NULL);
@@ -102,9 +104,6 @@ void Initialize(void)
 
   Wheel_round = 2*PI*Wheel_radius;
   Robot_round = 2*PI*Robot_radius;
-
-  switch_direction = true;
-  Theta_Distance_Flag = 0;
   
   pwm_msgs.motor1 = 0;
   pwm_msgs.motor2 = 0;
@@ -118,6 +117,8 @@ void Initialize(void)
 
   printf("\033[2J");  
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////
 
 void Motor_Controller(int motor_num, bool direction, int pwm)
 {
@@ -182,8 +183,6 @@ void Motor_View()
 {
 	printf("\033[2J");
 	printf("\033[1;1H");
-	printf("Encoder1A : %5d  ||  Encoder2A : %5d\n", EncoderCounter1A, EncoderCounter2A);
-	printf("Encoder1B : %5d  ||  Encoder2B : %5d\n", EncoderCounter1B, EncoderCounter2B);
 	printf("RPM1 : %f    ||  RPM2 : %f\n", cur_rpm1, cur_rpm2);
 	printf("Error1 : %f    ||  Error2 : %f\n", crash_pid1.error, crash_pid2.error);
 	printf("PWM1 : %10.0d    ||  PWM2 : %10.0d\n", current_PWM1, current_PWM2);

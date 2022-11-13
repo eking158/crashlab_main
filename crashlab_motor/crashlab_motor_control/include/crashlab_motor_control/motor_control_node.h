@@ -1,7 +1,7 @@
 #ifndef MOTOR_NODE_H
 #define MOTOR_NODE_H
 #include <pigpiod_if2.h>
-#include <crashlab_motor_msgs/control_motor.h>
+#include <geometry_msgs/Twist.h>
 
 #define motor1_DIR 19
 #define motor1_PWM 26
@@ -59,15 +59,6 @@ void Initialize(void);
 
 //Motor_Controller
 void Motor_Controller(int motor_num, bool direction, int pwm);
-void Accel_Controller(int motor_num, bool direction, int desired_pwm);
-
-//Example
-bool switch_direction;
-int Theta_Distance_Flag;
-void Switch_Turn_Example(int PWM1, int PWM2);
-void Theta_Turn(double Theta, int PWM);
-void Distance_Go(double Distance, int PWM);
-void Theta_Distance(double Theta, int Turn_PWM, double Distance, int Go_PWM);
 
 //Utiliy
 int Limit_Function(int pwm);
@@ -93,6 +84,7 @@ typedef struct pid
   double last_input=0;
   double lastderivative=0;
   double error=0;
+  double error_ratio=1;
   double lasterror=0;
 
   double output=0;
@@ -102,15 +94,25 @@ typedef struct pid
 pid_param crash_pid_param1, crash_pid_param2;  //kp, ki. kd. Imax, Dmax
 pid crash_pid1, crash_pid2;  //p_out, integrator, derivative, last_input, error, output
 
-int desire_rpm1;
-int desire_rpm2;
-
-double cur_rpm1;
-double cur_rpm2;
-
 int pwm1;
 int pwm2;
 
+void PIDGain_Input(void);
+double PidContoller(double goal, double curr, double cycle, pid *pid_data, pid_param *pid_paramdata);
+double simplePID(double goal, double curr, double cycle, pid *pid_data, pid_param *pid_paramdata);
+
+void Motor_Control_RPM(double rpm1, double rpm2);
+
 ///////////////////////////////////////////////////////////////////////////////////////////////
+ros::Subscriber sub_cmd_vel;
+///////////////////////////////////////////////////////////////////////////////////////////////
+
+geometry_msgs::Twist vel_msgs;
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void GetVelCallback(const geometry_msgs::Twist& msg);
+
+void Motor_robot_vel(double linear_x, double angular_z);
+
 
 #endif // MOTOR_NODE_H

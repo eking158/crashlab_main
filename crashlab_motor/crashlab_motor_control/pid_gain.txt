@@ -1,0 +1,8 @@
+crash_pid_param1.kP = 2
+crash_pid_param1.kI = 0.002
+crash_pid_param1.kD = 0.15
+crash_pid_param2.kP = 2
+crash_pid_param2.kI = 0
+crash_pid_param2.kD = 0
+crash_pid1.error_ratio = 0.1
+crash_pid2.error_ratio = 0.1
