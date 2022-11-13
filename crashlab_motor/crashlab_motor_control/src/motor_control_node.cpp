@@ -320,35 +320,19 @@ double simplePID(double goal, double curr, double cycle, pid *pid_data, pid_para
   double dt = 1/cycle;
   double error_rat = pid_data -> error_ratio;
   pid_data -> error = goal - curr;
-  
-  if (fabs(pid_data -> error) < error_rat)
-    pid_data -> error = 0;
 
   pid_data->p_out = pid_paramdata->kP * pid_data -> error;
   double p_data = pid_data->p_out ;
 
   pid_data->integrator += (pid_data -> error * pid_paramdata->kI) * dt;
   double i_data = pid_data->integrator;
-  i_data = constrain(i_data, -pid_paramdata->Imax, pid_paramdata->Imax);
 
-  double filter = 15.9155e-3; // Set to  "1 / ( 2 * PI * f_cut )";
-  // Examples for _filter:
-  // f_cut = 10 Hz -> _filter = 15.9155e-3
-  // f_cut = 15 Hz -> _filter = 10.6103e-3
-  // f_cut = 20 Hz -> _filter =  7.9577e-3
-  // f_cut = 25 Hz -> _filter =  6.3662e-3
-  // f_cut = 30 Hz -> _filter =  5.3052e-3
-
-  //pid_data->derivative = (goal - pid_data->last_input) / dt;
-  //pid_data->derivative = pid_data->lastderivative + (dt / (filter + dt)) * (pid_data->derivative - pid_data->lastderivative);
-  //pid_data->last_input = goal;
-  //pid_data->lastderivative = pid_data->derivative;
   pid_data -> derivative = pid_paramdata->kD * (pid_data -> error - pid_data -> lasterror)/dt;
   double d_data = pid_data->derivative;
-  //d_data = constrain(d_data, -pid_paramdata->Dmax, pid_paramdata->Dmax);
 
-  double output = p_data + i_data + d_data;
-  pid_data->output = output;
+  pid_data->output = p_data + i_data + d_data;
+  double output = pid_data->output;
+  
   
   pid_data -> lasterror = pid_data -> error;
 
