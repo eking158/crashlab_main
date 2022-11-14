@@ -1,11 +1,10 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>crashlab_motor_control</name>
+  <name>crashlab_teleop_key</name>
   <version>0.0.0</version>
   <description>The motor_test package</description>
 
   <maintainer email="crashlab@todo.todo">crashlab</maintainer>
-
 
   <license>TODO</license>
 

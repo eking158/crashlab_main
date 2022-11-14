@@ -238,6 +238,9 @@ void Motor_View()
 	printf("kP_1 :%f     ||  kP_2 :%f\n", crash_pid_param1.kP, crash_pid_param2.kP);
 	printf("kI_1 :%f     ||  kI_2 :%f\n", crash_pid_param1.kI, crash_pid_param2.kI);
 	printf("kD_1 :%f     ||  kD_2 :%f\n", crash_pid_param1.kD, crash_pid_param2.kD);
+	printf("P out_1 :%f     ||  P out_2 :%f\n", crash_pid1.p_out, crash_pid2.p_out);
+	printf("I out_1 :%f     ||  I out_2 :%f\n", crash_pid1.integrator, crash_pid2.integrator);
+	printf("D out_1 :%f     ||  D out_2 :%f\n", crash_pid1.derivative, crash_pid2.derivative);
 	printf("Error_1 :%f     ||  Error_2 :%f\n", crash_pid1.error, crash_pid2.error);
 	printf("\n");
 }
@@ -351,20 +354,21 @@ void Motor_Control_RPM(double rpm1, double rpm2){  //robot motor control by robo
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void GetVelCallback(const geometry_msgs::Twist& msg){
   vel_msgs.linear.x = msg.linear.x;
   vel_msgs.angular.z = msg.angular.z;
 }
 
-void Motor_robot_vel(double linear_x, double angular_z){  //robot motor control by robot velocity(linear x, linear y, angular z)
-//Wheel_radius : 바퀴 반지름(cm)
-//rpm: 분장 회전수
-//linear_x, angular_z : 속도(m/s)
-//PI : 원주율
-//rpm * (2 * pi * r) : 속도(cm/m)
-//(rpm/60) * (2 * pi* (r/100)) : 속도(m/s)
-  double rpm_1 = 60 * (linear_x - angular_z*2*Robot_radius) / (2 * PI * Wheel_radius / 100);
-  double rpm_2 = 60 * (linear_x + angular_z*2*Robot_radius) / (2 * PI * Wheel_radius / 100);
+void Motor_robot_vel(double linear_x, double angular_z){  
+	//Wheel_radius : 바퀴 반지름(cm)
+	//rpm: 분장 회전수
+	//linear_x, angular_z : 속도(m/s)
+	//PI : 원주율
+	//rpm * (2 * pi * r) : 속도(cm/m)
+	//(rpm/60) * (2 * pi* (r/100)) : 속도(m/s)
+  double rpm_1 = 60 * (linear_x - angular_z*2*Robot_radius/100) / (2 * PI * Wheel_radius / 100);
+  double rpm_2 = 60 * (linear_x + angular_z*2*Robot_radius/100) / (2 * PI * Wheel_radius / 100);
   
   if(rpm_1 >= 0){
     pwm1 = PidContoller(rpm_1, RPM_Value1, Control_cycle, &crash_pid1, &crash_pid_param1);
@@ -397,9 +401,14 @@ int main(int argc, char** argv)
   ros::Rate loop_rate(Control_cycle);
   
   sub_cmd_vel = nh.subscribe("crashlab/cmd_vel", 10, GetVelCallback);
+  pub_rpm = nh.advertise<crashlab_motor_msgs::control_motor>("crashlab/rpm", 10);
   
   while(ros::ok())
   {
+    rpm_msgs.motor1 = RPM_Value1;
+    rpm_msgs.motor2 = RPM_Value2;
+    pub_rpm.publish(rpm_msgs);
+    
     Motor_Control_RPM(80, 80);
     Motor_View();
     //Motor_Controller(1, true, 83);

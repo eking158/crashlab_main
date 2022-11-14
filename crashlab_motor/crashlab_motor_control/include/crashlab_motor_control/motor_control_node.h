@@ -2,6 +2,7 @@
 #define MOTOR_NODE_H
 #include <pigpiod_if2.h>
 #include <geometry_msgs/Twist.h>
+#include <crashlab_motor_msgs/control_motor.h>
 
 #define motor1_DIR 19
 #define motor1_PWM 26
@@ -104,10 +105,12 @@ double simplePID(double goal, double curr, double cycle, pid *pid_data, pid_para
 void Motor_Control_RPM(double rpm1, double rpm2);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
+ros::Publisher pub_rpm;
 ros::Subscriber sub_cmd_vel;
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
 geometry_msgs::Twist vel_msgs;
+crashlab_motor_msgs::control_motor rpm_msgs;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void GetVelCallback(const geometry_msgs::Twist& msg);
