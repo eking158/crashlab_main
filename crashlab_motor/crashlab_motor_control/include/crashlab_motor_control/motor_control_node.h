@@ -22,7 +22,7 @@ int PWM_range;
 int PWM_frequency;
 int PWM_limit;
 double Control_cycle;
-int Acceleration_ratio;
+double Wheel_base;
 double Wheel_radius;
 double Robot_radius;
 int Encoder_resolution;
@@ -36,7 +36,6 @@ int current_PWM1;
 int current_PWM2;
 bool current_Direction1;
 bool current_Direction2;
-int acceleration;
 
 //Interrupt_Setting
 void Interrupt_Setiing(void);

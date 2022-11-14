@@ -14,7 +14,7 @@ void Text_Input(void)
   int i = 0;
   std::size_t found;
   std::ifstream inFile;
-  inFile.open("/home/ubuntu/catkin_ws/src/crashlab_main/crashlab_motor/crashlab_motor_control/motor_input.txt");
+  inFile.open("/home/ubuntu/catkin_ws/src/crashlab_main/crashlab_settings/motor_input.txt");
   for(std::string line; std::getline(inFile,line);)
   {
       found=line.find("=");
@@ -25,7 +25,7 @@ void Text_Input(void)
       case 1: PWM_frequency = atof(line.substr(found+2).c_str()); break;
       case 2: PWM_limit = atof(line.substr(found+2).c_str()); break;
       case 3: Control_cycle = atof(line.substr(found+2).c_str()); break;
-      case 4: Acceleration_ratio = atof(line.substr(found+2).c_str()); break;
+      case 4: Wheel_base = atof(line.substr(found+2).c_str()); break;
       case 5: Wheel_radius = atof(line.substr(found+2).c_str()); break;
       case 6: Robot_radius = atof(line.substr(found+2).c_str()); break;
       case 7: Encoder_resolution = atof(line.substr(found+2).c_str()); break;
@@ -75,8 +75,6 @@ int Motor_Setup(void)
 
   current_Direction1 = true;
   current_Direction2 = true;
-
-  acceleration = PWM_limit/(Acceleration_ratio);
 
   ROS_INFO("Setup Fin");
   return 0;
@@ -150,7 +148,6 @@ void Initialize(void)
   ROS_INFO("PWM_frequency %d", PWM_frequency);
   ROS_INFO("PWM_limit %d", PWM_limit);
   ROS_INFO("Control_cycle %f", Control_cycle);
-  ROS_INFO("Acceleration_ratio %d", Acceleration_ratio);
   ROS_INFO("Initialize Complete");
 
   printf("\033[2J");  
@@ -252,7 +249,7 @@ void PIDGain_Input(void)
   int i = 0;
   std::size_t found;
   std::ifstream inFile;
-  inFile.open("/home/ubuntu/catkin_ws/src/crashlab_main/crashlab_motor/crashlab_motor_control/pid_gain.txt");
+  inFile.open("/home/ubuntu/catkin_ws/src/crashlab_main/crashlab_settings/pid_gain.txt");
   for(std::string line; std::getline(inFile,line);)
   {
       found=line.find("=");
