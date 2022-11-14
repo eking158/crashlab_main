@@ -277,12 +277,13 @@ double PidContoller(double goal, double curr, double cycle, pid *pid_data, pid_p
   // ROS_INFO(" goal : %f, curr: %f, dt: %f", goal,curr,dt);
   // double error = goal - curr;
   // ROS_INFO(" error : %f", error);
+  double err = goal - curr;
   double dt = 1/cycle;
   double error_rat = pid_data -> error_ratio;
-  pid_data -> error = goal - curr;
+  pid_data -> error = err;
   
-  //if (fabs(pid_data -> error) < error_rat)
-    //pid_data -> error = 0;
+  if (fabs(pid_data -> error) < error_rat)
+    pid_data -> error = 0;
 
   pid_data->p_out = pid_paramdata->kP * pid_data -> error;
   double p_data = pid_data->p_out ;
@@ -319,6 +320,9 @@ double simplePID(double goal, double curr, double cycle, pid *pid_data, pid_para
   double dt = 1/cycle;
   double error_rat = pid_data -> error_ratio;
   pid_data -> error = goal - curr;
+  
+  if (fabs(pid_data -> error) < error_rat)
+    pid_data -> error = 0;
 
   pid_data->p_out = pid_paramdata->kP * pid_data -> error;
   double p_data = pid_data->p_out ;
@@ -329,8 +333,8 @@ double simplePID(double goal, double curr, double cycle, pid *pid_data, pid_para
   pid_data -> derivative = pid_paramdata->kD * (pid_data -> error - pid_data -> lasterror)/dt;
   double d_data = pid_data->derivative;
 
-  pid_data->output = p_data + i_data + d_data;
-  double output = pid_data->output;
+  pid_data->output += p_data + i_data + d_data;
+  double pid_out = pid_data->output;
   
   
   pid_data -> lasterror = pid_data -> error;
@@ -342,15 +346,15 @@ double simplePID(double goal, double curr, double cycle, pid *pid_data, pid_para
 
 void Motor_Control_RPM(double rpm1, double rpm2){  //robot motor control by robot velocity(linear x, linear y, angular z)
 
-  //pwm1 = PidContoller(rpm1, RPM_Value1, Control_cycle, &crash_pid1, &crash_pid_param1);
-  //pwm2 = PidContoller(rpm2, RPM_Value2, Control_cycle, &crash_pid2, &crash_pid_param2);
+  pwm1 = PidContoller(rpm1, RPM_Value1, Control_cycle, &crash_pid1, &crash_pid_param1);
+  pwm2 = PidContoller(rpm2, RPM_Value2, Control_cycle, &crash_pid2, &crash_pid_param2);
   
-  pwm1 = simplePID(rpm1, RPM_Value1, Control_cycle, &crash_pid1, &crash_pid_param1);
+  //pwm1 = simplePID(rpm1, RPM_Value1, Control_cycle, &crash_pid1, &crash_pid_param1);
   //pwm2 = simplePID(rpm2, RPM_Value2, Control_cycle, &crash_pid2, &crash_pid_param2);
   
   Motor_Controller(1, true, pwm1);
-  //Motor_Controller(2, true, 80+pwm2);
-  //Motor_Controller(1, true, 83);
+  Motor_Controller(2, true, pwm2);
+  //Motor_Controller(2, true, 140);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -372,20 +376,20 @@ void Motor_robot_vel(double linear_x, double angular_z){
   
   if(rpm_1 >= 0){
     pwm1 = PidContoller(rpm_1, RPM_Value1, Control_cycle, &crash_pid1, &crash_pid_param1);
-    Motor_Controller(1, true, pwm1);
+    Motor_Controller(1, false, pwm1);
   }
   else{
     pwm1 = PidContoller(-rpm_1, RPM_Value1, Control_cycle, &crash_pid1, &crash_pid_param1);
-    Motor_Controller(1, false, pwm1);
+    Motor_Controller(1, true, pwm1);
   }
   
   if(rpm_2 >= 0){
     pwm2 = PidContoller(rpm_2, RPM_Value2, Control_cycle, &crash_pid2, &crash_pid_param2);
-    Motor_Controller(2, false, pwm2);
+    Motor_Controller(2, true, pwm2);
   }
   else{
     pwm2 = PidContoller(-rpm_2, RPM_Value2, Control_cycle, &crash_pid2, &crash_pid_param2);
-    Motor_Controller(2, true, pwm2);
+    Motor_Controller(2, false, pwm2);
   }
   
 }
@@ -409,9 +413,11 @@ int main(int argc, char** argv)
     rpm_msgs.motor2 = RPM_Value2;
     pub_rpm.publish(rpm_msgs);
     
-    Motor_Control_RPM(80, 80);
+    //Motor_Control_RPM(80, 80);
+    Motor_robot_vel(vel_msgs.linear.x, vel_msgs.angular.z);
+    
+    
     Motor_View();
-    //Motor_Controller(1, true, 83);
     ros::spinOnce();
     loop_rate.sleep();
   }

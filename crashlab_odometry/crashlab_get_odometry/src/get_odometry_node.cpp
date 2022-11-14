@@ -112,10 +112,9 @@ int main(int argc, char **argv)
 
     ros::init(argc, argv, "get_odometry_node");
     ros::NodeHandle nh;
+    Text_Input();
 
     ros::Rate loop_rate(Control_cycle);
-
-    Text_Input();
 
     pub_odom = nh.advertise<nav_msgs::Odometry>("/odom", 10);
     sub_rpm = nh.subscribe("/crashlab/rpm", 10, GetRPMCallback);

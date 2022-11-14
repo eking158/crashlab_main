@@ -6,13 +6,13 @@
 
 #define motor1_DIR 19
 #define motor1_PWM 26
-#define motor2_ENA 23
-#define motor2_ENB 24
+#define motor1_ENA 27  //Yellow Wire
+#define motor1_ENB 17  //Green Wire
 
 #define motor2_DIR 6
 #define motor2_PWM 13
-#define motor1_ENA 27
-#define motor1_ENB 17
+#define motor2_ENA 23  //Red Wire
+#define motor2_ENB 24  //Orange Wire -> have some problem
 
 #define PI 3.141592
 
