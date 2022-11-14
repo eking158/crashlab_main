@@ -281,8 +281,8 @@ double PidContoller(double goal, double curr, double cycle, pid *pid_data, pid_p
   double error_rat = pid_data -> error_ratio;
   pid_data -> error = goal - curr;
   
-  if (fabs(pid_data -> error) < error_rat)
-    pid_data -> error = 0;
+  //if (fabs(pid_data -> error) < error_rat)
+    //pid_data -> error = 0;
 
   pid_data->p_out = pid_paramdata->kP * pid_data -> error;
   double p_data = pid_data->p_out ;
@@ -299,16 +299,15 @@ double PidContoller(double goal, double curr, double cycle, pid *pid_data, pid_p
   // f_cut = 25 Hz -> _filter =  6.3662e-3
   // f_cut = 30 Hz -> _filter =  5.3052e-3
 
-  //pid_data->derivative = (goal - pid_data->last_input) / dt;
-  //pid_data->derivative = pid_data->lastderivative + (dt / (filter + dt)) * (pid_data->derivative - pid_data->lastderivative);
-  //pid_data->last_input = goal;
-  //pid_data->lastderivative = pid_data->derivative;
-  pid_data -> derivative = pid_paramdata->kD * (pid_data -> error - pid_data -> lasterror)/dt;
+  pid_data->derivative = (goal - pid_data->last_input) / dt;
+  pid_data->derivative = pid_data->lastderivative + (dt / (filter + dt)) * (pid_data->derivative - pid_data->lastderivative);
+  pid_data->last_input = goal;
+  pid_data->lastderivative = pid_data->derivative;
   double d_data = pid_data->derivative;
-  //d_data = constrain(d_data, -pid_paramdata->Dmax, pid_paramdata->Dmax);
+  d_data = constrain(d_data, -pid_paramdata->Dmax, pid_paramdata->Dmax);
 
-  double output = p_data + i_data + d_data;
-  pid_data->output = output;
+  double pid_out = p_data + i_data + d_data;
+  pid_data->output += pid_out;
   
   pid_data -> lasterror = pid_data -> error;
 
@@ -343,8 +342,12 @@ double simplePID(double goal, double curr, double cycle, pid *pid_data, pid_para
 
 void Motor_Control_RPM(double rpm1, double rpm2){  //robot motor control by robot velocity(linear x, linear y, angular z)
 
-  pwm1 = PidContoller(rpm1, RPM_Value1, Control_cycle, &crash_pid1, &crash_pid_param1);
+  //pwm1 = PidContoller(rpm1, RPM_Value1, Control_cycle, &crash_pid1, &crash_pid_param1);
   //pwm2 = PidContoller(rpm2, RPM_Value2, Control_cycle, &crash_pid2, &crash_pid_param2);
+  
+  pwm1 = simplePID(rpm1, RPM_Value1, Control_cycle, &crash_pid1, &crash_pid_param1);
+  //pwm2 = simplePID(rpm2, RPM_Value2, Control_cycle, &crash_pid2, &crash_pid_param2);
+  
   Motor_Controller(1, true, pwm1);
   //Motor_Controller(2, true, 80+pwm2);
   //Motor_Controller(1, true, 83);

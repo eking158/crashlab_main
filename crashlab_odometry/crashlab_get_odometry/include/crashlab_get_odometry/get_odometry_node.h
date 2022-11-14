@@ -24,13 +24,26 @@ int Encoder_resolution;
 double Wheel_round;
 double Robot_round;
 
+ros::Publisher pub_odom;
+ros::Subscriber sub_rpm;
+
+//msgs
 crashlab_motor_msgs::control_motor rpm_msgs;
 geometry_msgs::Pose2D Pose2D_msgs;
 nav_msgs::Odometry odom;
 geometry_msgs::TransformStamped odom_trans;
+
+//변수
 float dt;
+float velR = 0.0, velL = 0.0;
+
+//time
 ros::Time current_time, last_time;
 
-float velR = 0.0, velL = 0.0;
+//Callback
+void GetRPMCallback(const crashlab_motor_msgs::control_motor &msg);
+
+//Functions
+void CalcAblePosition();
 
 #endif // ODOMETRY_NODE_H

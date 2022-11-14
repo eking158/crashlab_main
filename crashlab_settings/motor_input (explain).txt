@@ -1,0 +1,8 @@
+pwm_range = 512
+pwm_frequency = 40000
+pwm_limit = 250
+control_cycle = 10
+wheel_base = 왼쪽 바퀴와 오른쪽 바퀴 사이의 거
+wheel_radius = 바퀴 반지
+robot_radius = 로봇 반지름
+encoder_resolution = 228

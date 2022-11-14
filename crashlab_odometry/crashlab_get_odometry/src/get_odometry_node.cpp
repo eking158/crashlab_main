@@ -110,17 +110,17 @@ void CalcAblePosition()
 int main(int argc, char **argv)
 {
 
-    ros::init(argc, argv, "mobile_localization_node");
+    ros::init(argc, argv, "get_odometry_node");
     ros::NodeHandle nh;
 
-    ros::Rate loop_rate(10);
+    ros::Rate loop_rate(Control_cycle);
 
     Text_Input();
 
-    ros::Publisher pub_odom = nh.advertise<nav_msgs::Odometry>("/odom", 10);
+    pub_odom = nh.advertise<nav_msgs::Odometry>("/odom", 10);
+    sub_rpm = nh.subscribe("/crashlab/rpm", 10, GetRPMCallback);
     tf::TransformBroadcaster odom_broadcaster;
 
-    ros::Subscriber sub_rpm = nh.subscribe("/crashlab/rpm", 10, GetRPMCallback);
 
     Pose2D_msgs.x = 0.0;
     Pose2D_msgs.y = 0.0;
