@@ -36,6 +36,7 @@ geometry_msgs::TransformStamped odom_trans;
 //변수
 float dt;
 float velR = 0.0, velL = 0.0;
+float rpmR = 0.0, rpmL = 0.0;
 
 //time
 ros::Time current_time, last_time;

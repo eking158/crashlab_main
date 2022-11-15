@@ -96,6 +96,8 @@ pid crash_pid1, crash_pid2;  //p_out, integrator, derivative, last_input, error,
 
 int pwm1;
 int pwm2;
+double goal_rpm1;
+double goal_rpm2;
 
 void PIDGain_Input(void);
 double PidContoller(double goal, double curr, double cycle, pid *pid_data, pid_param *pid_paramdata);

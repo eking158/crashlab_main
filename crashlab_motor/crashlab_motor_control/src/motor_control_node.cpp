@@ -140,6 +140,8 @@ void Initialize(void)
   
   pwm1=0;
   pwm2=0;
+  goal_rpm1=0;
+  goal_rpm2=0;
 
   Wheel_round = 2*PI*Wheel_radius;
   Robot_round = 2*PI*Robot_radius;
@@ -225,6 +227,8 @@ void RPM_Calculator()
 void Motor_View()
 {
 	RPM_Calculator();
+	crash_pid1.error = goal_rpm1 - RPM_Value1;
+	crash_pid2.error = goal_rpm2 - RPM_Value2;
 	printf("\033[2J");
 	printf("\033[1;1H");
 	printf("Encoder1A : %5d  ||  Encoder2A : %5d\n", EncoderCounter1A, EncoderCounter2A);
@@ -277,10 +281,10 @@ double PidContoller(double goal, double curr, double cycle, pid *pid_data, pid_p
   // ROS_INFO(" goal : %f, curr: %f, dt: %f", goal,curr,dt);
   // double error = goal - curr;
   // ROS_INFO(" error : %f", error);
-  double err = goal - curr;
+  //double err = goal - curr;
   double dt = 1/cycle;
   double error_rat = pid_data -> error_ratio;
-  pid_data -> error = err;
+  //pid_data -> error = err;
   
   if (fabs(pid_data -> error) < error_rat)
     pid_data -> error = 0;
@@ -319,7 +323,8 @@ double simplePID(double goal, double curr, double cycle, pid *pid_data, pid_para
 {
   double dt = 1/cycle;
   double error_rat = pid_data -> error_ratio;
-  pid_data -> error = goal - curr;
+  //pid_data -> error = goal - curr;
+  
   
   if (fabs(pid_data -> error) < error_rat)
     pid_data -> error = 0;
@@ -411,13 +416,15 @@ int main(int argc, char** argv)
   {
     rpm_msgs.motor1 = RPM_Value1;
     rpm_msgs.motor2 = RPM_Value2;
+    rpm_msgs.dir1 = current_Direction1;
+    rpm_msgs.dir2 = current_Direction2;
     pub_rpm.publish(rpm_msgs);
     
-    //Motor_Control_RPM(80, 80);
-    Motor_robot_vel(vel_msgs.linear.x, vel_msgs.angular.z);
-    
-    
     Motor_View();
+    
+    Motor_Control_RPM(80, 80);
+    //Motor_robot_vel(vel_msgs.linear.x, vel_msgs.angular.z);
+    
     ros::spinOnce();
     loop_rate.sleep();
   }

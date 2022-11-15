@@ -45,8 +45,19 @@ void Text_Input(void)
 
 void GetRPMCallback(const crashlab_motor_msgs::control_motor &msg)
 {
-    velL = msg.motor1;
-    velR = msg.motor2;
+   if(msg.dir1 == 1){
+      rpmL = msg.motor1;
+   }
+   else{
+      rpmL = -msg.motor1;
+   }
+   
+   if(msg.dir2 == 1){
+      rpmR = -msg.motor2;
+   }
+   else{
+      rpmR = msg.motor2;
+   }
 }
 
 void CalcAblePosition()
@@ -55,8 +66,11 @@ void CalcAblePosition()
     dt = (current_time - last_time).toSec();
     last_time = current_time;
     
+    velL = rpmL*(2*math_pi*Wheel_radius/100)/60;
+    velR = rpmR*(2*math_pi*Wheel_radius/100)/60;
+    
     float linear_vel = (velL + velR) / 2;
-    float angular_vel = (velR - velL) / Wheel_base;
+    float angular_vel = (velR - velL) / (Wheel_base/100);
 
     float distance_delta = linear_vel * 0.1;
     float angular_delta = angular_vel * 0.1;
