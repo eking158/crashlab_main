@@ -2,16 +2,17 @@
 #define MOTOR_NODE_H
 #include <pigpiod_if2.h>
 #include <geometry_msgs/Twist.h>
+#include <crashlab_motor_msgs/control_motor.h>
 
 #define motor1_DIR 19
 #define motor1_PWM 26
-#define motor2_ENA 23
-#define motor2_ENB 24
+#define motor1_ENA 27  //Yellow Wire
+#define motor1_ENB 17  //Green Wire
 
 #define motor2_DIR 6
 #define motor2_PWM 13
-#define motor1_ENA 27
-#define motor1_ENB 17
+#define motor2_ENA 23  //Red Wire
+#define motor2_ENB 24  //Orange Wire -> have some problem
 
 #define PI 3.141592
 
@@ -21,7 +22,7 @@ int PWM_range;
 int PWM_frequency;
 int PWM_limit;
 double Control_cycle;
-int Acceleration_ratio;
+double Wheel_base;
 double Wheel_radius;
 double Robot_radius;
 int Encoder_resolution;
@@ -35,7 +36,6 @@ int current_PWM1;
 int current_PWM2;
 bool current_Direction1;
 bool current_Direction2;
-int acceleration;
 
 //Interrupt_Setting
 void Interrupt_Setiing(void);
@@ -96,6 +96,8 @@ pid crash_pid1, crash_pid2;  //p_out, integrator, derivative, last_input, error,
 
 int pwm1;
 int pwm2;
+double goal_rpm1;
+double goal_rpm2;
 
 void PIDGain_Input(void);
 double PidContoller(double goal, double curr, double cycle, pid *pid_data, pid_param *pid_paramdata);
@@ -104,10 +106,12 @@ double simplePID(double goal, double curr, double cycle, pid *pid_data, pid_para
 void Motor_Control_RPM(double rpm1, double rpm2);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
+ros::Publisher pub_rpm;
 ros::Subscriber sub_cmd_vel;
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
 geometry_msgs::Twist vel_msgs;
+crashlab_motor_msgs::control_motor rpm_msgs;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void GetVelCallback(const geometry_msgs::Twist& msg);
