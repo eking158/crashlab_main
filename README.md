@@ -51,3 +51,13 @@
 -/crashlab/cmd_vel: 모터 제어를 위한 선속도, 각속도값을 주고받는 토픽
 
 -/odom: odom값을 반환하는 토픽
+
+////////////////////////////////////////////////////////////////////////////////////////
+
+<폴더 설명>
+
+-crashlab_motor: 모터 제어와 관련된 패키지를 모아놓는 폴더
+-crashlab_msg: custom message를 모아두는 폴더
+-crashlab_odometry: odom관련 패키지를 모아두는 폴더
+-crashlab_remote_control: remote control관련 패키지를 모아두는 폴더
+-crashlab_settings: setting 텍스트 파일 모다우는 폴더
