@@ -351,6 +351,8 @@ double simplePID(double goal, double curr, double cycle, pid *pid_data, pid_para
 
 void Motor_Control_RPM(double rpm1, double rpm2){  //robot motor control by robot velocity(linear x, linear y, angular z)
 
+  goal_rpm1 = rpm1;
+  goal_rpm2 = rpm2;
   pwm1 = PidContoller(rpm1, RPM_Value1, Control_cycle, &crash_pid1, &crash_pid_param1);
   pwm2 = PidContoller(rpm2, RPM_Value2, Control_cycle, &crash_pid2, &crash_pid_param2);
   
@@ -376,25 +378,34 @@ void Motor_robot_vel(double linear_x, double angular_z){
 	//PI : 원주율
 	//rpm * (2 * pi * r) : 속도(cm/m)
 	//(rpm/60) * (2 * pi* (r/100)) : 속도(m/s)
-  double rpm_1 = 60 * (linear_x - angular_z*2*Robot_radius/100) / (2 * PI * Wheel_radius / 100);
-  double rpm_2 = 60 * (linear_x + angular_z*2*Robot_radius/100) / (2 * PI * Wheel_radius / 100);
-  
-  if(rpm_1 >= 0){
-    pwm1 = PidContoller(rpm_1, RPM_Value1, Control_cycle, &crash_pid1, &crash_pid_param1);
+  double rpm1 = 60 * (linear_x - angular_z*2*Robot_radius/100) / (2 * PI * Wheel_radius / 100);
+  double rpm2 = 60 * (linear_x + angular_z*2*Robot_radius/100) / (2 * PI * Wheel_radius / 100);
+  if(linear_x == 0 && angular_z == 0){
+  Motor_Controller(1, false, 0);
+  Motor_Controller(2, false, 0);
+  }
+  else{
+  if(rpm1 >= 0){
+    goal_rpm1 = rpm1;
+    pwm1 = PidContoller(goal_rpm1, RPM_Value1, Control_cycle, &crash_pid1, &crash_pid_param1);
     Motor_Controller(1, false, pwm1);
   }
   else{
-    pwm1 = PidContoller(-rpm_1, RPM_Value1, Control_cycle, &crash_pid1, &crash_pid_param1);
+    goal_rpm1 = -rpm1;
+    pwm1 = PidContoller(-goal_rpm1, RPM_Value1, Control_cycle, &crash_pid1, &crash_pid_param1);
     Motor_Controller(1, true, pwm1);
   }
   
-  if(rpm_2 >= 0){
-    pwm2 = PidContoller(rpm_2, RPM_Value2, Control_cycle, &crash_pid2, &crash_pid_param2);
+  if(rpm2 >= 0){
+    goal_rpm2 = rpm2;
+    pwm2 = PidContoller(goal_rpm2, RPM_Value2, Control_cycle, &crash_pid2, &crash_pid_param2);
     Motor_Controller(2, true, pwm2);
   }
   else{
-    pwm2 = PidContoller(-rpm_2, RPM_Value2, Control_cycle, &crash_pid2, &crash_pid_param2);
+    goal_rpm2 = -rpm2;
+    pwm2 = PidContoller(-goal_rpm2, RPM_Value2, Control_cycle, &crash_pid2, &crash_pid_param2);
     Motor_Controller(2, false, pwm2);
+  }
   }
   
 }
@@ -422,8 +433,8 @@ int main(int argc, char** argv)
     
     Motor_View();
     
-    Motor_Control_RPM(80, 80);
-    //Motor_robot_vel(vel_msgs.linear.x, vel_msgs.angular.z);
+    //Motor_Control_RPM(80, 80);
+    Motor_robot_vel(vel_msgs.linear.x, vel_msgs.angular.z);
     
     ros::spinOnce();
     loop_rate.sleep();

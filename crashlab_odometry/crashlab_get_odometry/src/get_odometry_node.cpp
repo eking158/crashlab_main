@@ -46,17 +46,17 @@ void Text_Input(void)
 void GetRPMCallback(const crashlab_motor_msgs::control_motor &msg)
 {
    if(msg.dir1 == 1){
-      rpmL = msg.motor1;
+      rpmL = -msg.motor1;
    }
    else{
-      rpmL = -msg.motor1;
+      rpmL = msg.motor1;
    }
    
    if(msg.dir2 == 1){
-      rpmR = -msg.motor2;
+      rpmR = msg.motor2;
    }
    else{
-      rpmR = msg.motor2;
+      rpmR = -msg.motor2;
    }
 }
 
