@@ -433,8 +433,10 @@ int main(int argc, char** argv)
     
     Motor_View();
     
+    Motor_Controller(1, true, 180);
+    Motor_Controller(2, true, 180);
     //Motor_Control_RPM(80, 80);
-    Motor_robot_vel(vel_msgs.linear.x, vel_msgs.angular.z);
+    //Motor_robot_vel(vel_msgs.linear.x, vel_msgs.angular.z);
     
     ros::spinOnce();
     loop_rate.sleep();
