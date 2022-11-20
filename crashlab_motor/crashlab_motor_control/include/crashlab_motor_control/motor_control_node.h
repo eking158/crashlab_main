@@ -94,6 +94,12 @@ typedef struct pid
 pid_param crash_pid_param1, crash_pid_param2;  //kp, ki. kd. Imax, Dmax
 pid crash_pid1, crash_pid2;  //p_out, integrator, derivative, last_input, error, output
 
+ros::Time curr_time_pid;
+ros::Time prev_time_pid;
+
+ros::Time curr_time_rpm;
+ros::Time prev_time_rpm;
+
 int pwm1;
 int pwm2;
 double goal_rpm1;
@@ -117,6 +123,8 @@ crashlab_motor_msgs::control_motor rpm_msgs;
 void GetVelCallback(const geometry_msgs::Twist& msg);
 
 void Motor_robot_vel(double linear_x, double angular_z);
+void Motor_robot_vel_pwm(double linear_x, double angular_z);
+double RPM2PWM(double rpm);
 
 
 #endif // MOTOR_NODE_H
