@@ -86,6 +86,8 @@ typedef struct pid
   double error=0;
   double error_ratio=1;
   double lasterror=0;
+  ros::Time curr_time;
+  ros::Time prev_time;
 
   double output=0;
 } pid;
@@ -93,9 +95,6 @@ typedef struct pid
 
 pid_param crash_pid_param1, crash_pid_param2;  //kp, ki. kd. Imax, Dmax
 pid crash_pid1, crash_pid2;  //p_out, integrator, derivative, last_input, error, output
-
-ros::Time curr_time_pid;
-ros::Time prev_time_pid;
 
 ros::Time curr_time_rpm;
 ros::Time prev_time_rpm;

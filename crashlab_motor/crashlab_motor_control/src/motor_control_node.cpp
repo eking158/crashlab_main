@@ -287,8 +287,8 @@ double PidContoller(double goal, double curr, double cycle, pid *pid_data, pid_p
   // double error = goal - curr;
   // ROS_INFO(" error : %f", error);
   //double err = goal - curr;
-  curr_time_pid = ros::Time::now();
-  double dt = (curr_time_pid - prev_time_pid).toSec();
+  pid_data->curr_time = ros::Time::now();
+  double dt = (pid_data->curr_time - pid_data->prev_time).toSec();
   //double dt = 1/cycle;
   double error_rat = pid_data -> error_ratio;
   //pid_data -> error = err;
@@ -323,15 +323,15 @@ double PidContoller(double goal, double curr, double cycle, pid *pid_data, pid_p
   
   pid_data -> lasterror = pid_data -> error;
 
-  prev_time_pid = curr_time_pid;
+  pid_data->prev_time = pid_data->curr_time;
 
   return pid_data->output;
 }
 //----------------------------------------------------------------------------------
 double simplePID(double goal, double curr, double cycle, pid *pid_data, pid_param *pid_paramdata)
 {
-  curr_time_pid = ros::Time::now();
-  double dt = (curr_time_pid - prev_time_pid).toSec();
+  pid_data->curr_time = ros::Time::now();
+  double dt = (pid_data->curr_time - pid_data->prev_time).toSec();
   //double dt = 1/cycle;
   double error_rat = pid_data -> error_ratio;
   //pid_data -> error = goal - curr;
@@ -355,7 +355,7 @@ double simplePID(double goal, double curr, double cycle, pid *pid_data, pid_para
   
   pid_data -> lasterror = pid_data -> error;
 
-  prev_time_pid = curr_time_pid;
+  pid_data->prev_time = pid_data->curr_time;
 
   return pid_data->output;
 }
