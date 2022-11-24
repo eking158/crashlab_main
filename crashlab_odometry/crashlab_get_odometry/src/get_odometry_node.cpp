@@ -84,7 +84,7 @@ void CalcAblePosition()
 
     odom_trans.header.stamp = current_time;
     odom_trans.header.frame_id = "odom";
-    odom_trans.child_frame_id = "base_link";
+    odom_trans.child_frame_id = "base_footprint";
 
     odom_trans.transform.translation.x = Pose2D_msgs.x;
     odom_trans.transform.translation.y = Pose2D_msgs.y;
@@ -99,7 +99,7 @@ void CalcAblePosition()
     odom.pose.pose.position.z = 0.0;
     odom.pose.pose.orientation = odom_quat;
     //set the velocity
-    odom.child_frame_id = "base_link";
+    odom.child_frame_id = "base_footprint";
     odom.twist.twist.linear.x= linear_vel;
     odom.twist.twist.linear.y=0.0;
     odom.twist.twist.angular.z = angular_vel;

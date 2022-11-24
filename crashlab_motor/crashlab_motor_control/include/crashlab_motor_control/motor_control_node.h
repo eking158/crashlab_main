@@ -6,13 +6,13 @@
 
 #define motor1_DIR 19
 #define motor1_PWM 26
-#define motor1_ENA 27  //Yellow Wire
-#define motor1_ENB 17  //Green Wire
+#define motor1_ENA 23  //Yellow Wire
+#define motor1_ENB 24  //Green Wire
 
 #define motor2_DIR 6
 #define motor2_PWM 13
-#define motor2_ENA 23  //Red Wire
-#define motor2_ENB 24  //Orange Wire -> have some problem
+#define motor2_ENA 27  //Red Wire
+#define motor2_ENB 17  //Orange Wire -> have some problem
 
 #define PI 3.141592
 
@@ -94,6 +94,10 @@ typedef struct pid
 pid_param crash_pid_param1, crash_pid_param2;  //kp, ki. kd. Imax, Dmax
 pid crash_pid1, crash_pid2;  //p_out, integrator, derivative, last_input, error, output
 
+ros::Time curr_time_rpm;
+ros::Time prev_time_rpm;
+double error_time=0;
+
 int pwm1;
 int pwm2;
 double goal_rpm1;
@@ -117,6 +121,8 @@ crashlab_motor_msgs::control_motor rpm_msgs;
 void GetVelCallback(const geometry_msgs::Twist& msg);
 
 void Motor_robot_vel(double linear_x, double angular_z);
+void Motor_robot_vel_pwm(double linear_x, double angular_z);
+double RPM2PWM(double rpm);
 
 
 #endif // MOTOR_NODE_H
