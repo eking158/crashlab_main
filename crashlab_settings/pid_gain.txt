@@ -1,11 +1,11 @@
 crash_pid_param1.kP = 0.5
-crash_pid_param1.kI = 0.005
-crash_pid_param1.kD = 0.01
-crash_pid_param2.kP = 0.04
-crash_pid_param2.kI = 0.005
-crash_pid_param2.kD = 0.01
-crash_pid1.error_ratio = 1
-crash_pid2.error_ratio = 1
+crash_pid_param1.kI = 0.1
+crash_pid_param1.kD = 0.05
+crash_pid_param2.kP = 0.5
+crash_pid_param2.kI = 0.1
+crash_pid_param2.kD = 0.05
+crash_pid1.error_ratio = 3
+crash_pid2.error_ratio = 3
 
 
 
@@ -18,3 +18,12 @@ crash_pid_param2.kD = 0
 
 kcr 1.2
 pcr 0.8
+
+
+
+crash_pid_param1.kP = 0.5
+crash_pid_param1.kI = 0.1
+crash_pid_param1.kD = 0.05
+crash_pid_param2.kP = 0.4
+crash_pid_param2.kI = 0.1
+crash_pid_param2.kD = 0.05

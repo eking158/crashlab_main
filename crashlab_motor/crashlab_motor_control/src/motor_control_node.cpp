@@ -72,13 +72,18 @@ int Motor_Setup(void)
 
   current_PWM1 = 0;
   current_PWM2 = 0;
-
+  
+  memory1;
+  memory2;
+  mem_count=0;
+  
   current_Direction1 = true;
   current_Direction2 = true;
 
   ROS_INFO("Setup Fin");
   return 0;
 }
+
 void Interrupt_Setting(void)
 {
     callback(pinum, motor1_ENA, EITHER_EDGE, Interrupt1A);
@@ -224,22 +229,45 @@ void RPM_Calculator()
   
 
   RPM_Value1 = (EncoderSpeedCounter1*(60*1/error_time))/(Encoder_resolution*4);
+  memory1[mem_count%10] = RPM_Value1;
   EncoderSpeedCounter1 = 0;
   RPM_Value2 = (EncoderSpeedCounter2*(60*1/error_time))/(Encoder_resolution*4);
+  memory2[mem_count%10] = RPM_Value2;
   EncoderSpeedCounter2 = 0;
-
+  mem_count++;
   prev_time_rpm = curr_time_rpm;
 }
 void Motor_View()
 {
 	RPM_Calculator();
+	double average[2]={0,0};
+	double meansq[2] = {0,0};
+	double stdv[2] = {0,0};
+	if(mem_count%10 == 9){
+    	  for(int i=0;i<10;i++){
+    	    average[0] += memory1[i];
+    	    average[1] += memory2[i];
+    	  }
+    	  average[0]/=10;
+    	  average[1]/=10;
+    	  for(int i=0;i<10;i++){
+    	    memory1[i] -= average[0];
+    	    memory2[i] -= average[1];
+    	  }
+    	  for(int i=0;i<10;i++){
+    	    meansq[0] += pow((memory1[i] - average[0]),2);
+    	    meansq[1] += pow((memory2[i] - average[1]),2);
+    	  }
+    	  stdv[0] = sqrt(meansq[0]/10);
+    	  stdv[1] = sqrt(meansq[1]/10);
+  	}
 	crash_pid1.error = goal_rpm1 - RPM_Value1;
 	crash_pid2.error = goal_rpm2 - RPM_Value2;
 	printf("\033[2J");
 	printf("\033[1;1H");
 	printf("Encoder1A : %5d  ||  Encoder2A : %5d\n", EncoderCounter1A, EncoderCounter2A);
 	printf("Encoder1B : %5d  ||  Encoder2B : %5d\n", EncoderCounter1B, EncoderCounter2B);
-	printf("RPM1 : %10.0f    ||  RPM2 : %10.0f\n", RPM_Value1, RPM_Value2);
+	printf("RPM1 : %10f    ||  RPM2 : %10f\n", RPM_Value1, RPM_Value2);
 	printf("PWM1 : %10.0d    ||  PWM2 : %10.0d\n", current_PWM1, current_PWM2);
 	printf("DIR1 :%10.0d     ||  DIR2 :%10.0d\n", current_Direction1, current_Direction2);
 	printf("kP_1 :%f     ||  kP_2 :%f\n", crash_pid_param1.kP, crash_pid_param2.kP);
@@ -249,6 +277,7 @@ void Motor_View()
 	printf("I out_1 :%f     ||  I out_2 :%f\n", crash_pid1.integrator, crash_pid2.integrator);
 	printf("D out_1 :%f     ||  D out_2 :%f\n", crash_pid1.derivative, crash_pid2.derivative);
 	printf("Error_1 :%f     ||  Error_2 :%f\n", crash_pid1.error, crash_pid2.error);
+	printf("stdv_1 :%f     ||  stdv_2 :%f\n", stdv[0], stdv[1]);
 	printf("time :%f\n", error_time);
 	printf("\n");
 }
@@ -493,7 +522,7 @@ int main(int argc, char** argv)
     
     Motor_View();
     
-    Motor_Control_RPM(80, 80);
+    Motor_Control_RPM(65, 65);
     //Motor_robot_vel(vel_msgs.linear.x, vel_msgs.angular.z);
     //Motor_robot_vel_pwm(vel_msgs.linear.x, vel_msgs.angular.z);
     

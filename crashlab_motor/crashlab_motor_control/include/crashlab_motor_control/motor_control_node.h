@@ -66,6 +66,11 @@ double RPM_Value1;
 double RPM_Value2;
 void RPM_Calculator();
 void Motor_View();
+
+double memory1[10];
+double memory2[10];
+int mem_count;
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 typedef struct pid_param
 {
