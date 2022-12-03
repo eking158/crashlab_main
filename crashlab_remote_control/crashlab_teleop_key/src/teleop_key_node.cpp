@@ -107,7 +107,7 @@ int main(int argc, char** argv)
   ros::NodeHandle nh;
 
   // Init cmd_vel publisher
-  ros::Publisher pub = nh.advertise<geometry_msgs::Twist>("crashlab/cmd_vel", 1);
+  ros::Publisher pub = nh.advertise<geometry_msgs::Twist>("cmd_vel", 1);
 
   // Create Twist message
   geometry_msgs::Twist twist;

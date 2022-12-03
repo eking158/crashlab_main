@@ -480,7 +480,7 @@ int main(int argc, char** argv)
   Initialize();
   ros::Rate loop_rate(Control_cycle);
   
-  sub_cmd_vel = nh.subscribe("crashlab/cmd_vel", 10, GetVelCallback);
+  sub_cmd_vel = nh.subscribe("cmd_vel", 10, GetVelCallback);
   pub_rpm = nh.advertise<crashlab_motor_msgs::control_motor>("crashlab/rpm", 10);
   
   while(ros::ok())
